@@ -82,7 +82,7 @@ func (p *Proxy) ListenAndServe() error {
 		return err
 	}
 
-	go p.ClientConnect(conn)
+	go p.OnClientConnect(conn)
 
 	return nil
 }
@@ -138,7 +138,7 @@ func (p *Proxy) Options(client *Client) {
 	client.conn.Write([]byte(reply))
 }
 
-func (p *Proxy) Request(client *Client) (*http.Request, error) {
+func (p *Proxy) GetClientRequest(client *Client) (*http.Request, error) {
 
 	r := bufio.NewReader(client.conn)
 	req, err := http.ReadRequest(r)
@@ -152,7 +152,7 @@ func (p *Proxy) Request(client *Client) (*http.Request, error) {
 	return req, nil
 }
 
-func (p *Proxy) ClientConnect(conn net.Conn) {
+func (p *Proxy) OnClientConnect(conn net.Conn) {
 
 	defer conn.Close()
 
@@ -160,7 +160,7 @@ func (p *Proxy) ClientConnect(conn net.Conn) {
 
 	client := &Client{conn: conn, address: conn.RemoteAddr().String(), state: CONNECTED}
 
-	req, err := p.Request(client)
+	req, err := p.GetClientRequest(client)
 	if err != nil {
 		return
 	}
